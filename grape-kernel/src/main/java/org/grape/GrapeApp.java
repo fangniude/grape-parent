@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.PropertySource;
 
 import java.io.IOException;
@@ -31,7 +31,10 @@ public class GrapeApp {
     private static final Logger logger = LoggerFactory.getLogger(GrapeApp.class);
 
     private static final Properties properties = new Properties();
-    private static ServerConfig serverConfig;
+    private static final List<GrapePlugin> plugins = Lists.newArrayList();
+    private static final ServerConfig serverConfig = new ServerConfig();
+    private static EbeanServer ebeanServer;
+    private static ApplicationContext appContext;
 
     static {
         // loadProperties
@@ -45,16 +48,22 @@ public class GrapeApp {
         AgentLoader.loadAgentFromClasspath("avaje-ebeanorm-agent", "debug=1");
     }
 
+    private GrapeApp() {
+    }
 
     public static void main(String[] args) {
-        List<GrapePlugin> plugins = loadPlugin();
+        start(args);
+    }
+
+    public static void start(String[] args) {
+        loadPlugin();
         plugins.forEach(GrapePlugin::inTheBeginning);
 
         createEbeanServer();
-        flyway(plugins);
+        flyway();
         plugins.forEach(GrapePlugin::afterDataBaseInitial);
 
-        final ConfigurableApplicationContext appContext = initSpring(plugins, args);
+        initSpring(args);
         plugins.forEach(plg -> plg.afterSpringInitial(appContext));
 
         // start success
@@ -67,28 +76,43 @@ public class GrapeApp {
         plugins.forEach(plg -> plg.afterStarted(appContext));
     }
 
-    private static ConfigurableApplicationContext initSpring(List<GrapePlugin> plugins, String[] args) {
-        logger.info("Init spring begin.");
-        ArrayList<Object> ss = Lists.newArrayList(GrapeApp.class);
-        ss.addAll(plugins.stream().map(GrapePlugin::name).map(Package::getPackage).collect(Collectors.toList()));
-        SpringApplication app = new SpringApplication(ss.toArray());
+    private static void loadPlugin() {
+        logger.info("Load pitaya plugin begin.");
 
-        // init spring
-        logger.info("Loading spring beans, this will take some time, please be patient.");
-        final ConfigurableApplicationContext appContext = app.run(args);
-        logger.info("Init spring end.\n");
-        return appContext;
+        Set<GrapePlugin> set = Sets.newHashSet();
+
+        ServiceLoader<GrapePlugin> plgs = ServiceLoader.load(GrapePlugin.class);
+        for (GrapePlugin plg : plgs) {
+            logger.info("find pitaya plugin: " + plg.name());
+            if (set.contains(plg)) {
+                String msg = String.format("Duplicate plugin: %s, plugin name must be unique.", plg.name());
+                logger.warn(msg);
+                throw new GrapeException(msg);
+            }
+            set.add(plg);
+        }
+
+        plugins.addAll(set);
+        Collections.sort(plugins);
+        List<String> on = plugins.stream().map(GrapePlugin::name).collect(Collectors.toList());
+        logger.info("Plugin order: " + String.join(", ", on));
+        logger.info("Load pitaya plugin end.\n");
     }
 
     private static void createEbeanServer() {
-        serverConfig = new ServerConfig();
-        serverConfig.setName("default");
         serverConfig.setDefaultServer(true);
         serverConfig.loadFromProperties(GrapeApp.properties);
         serverConfig.setRegister(true);
         serverConfig.setLazyLoadBatchSize(100);
 
-        EbeanServer ebeanServer = EbeanServerFactory.create(serverConfig);
+        serverConfig.addPackage(GrapeModel.class.getPackage().getName());
+        for (GrapePlugin plg : plugins) {
+            if (plg.hasEntity()) {
+                serverConfig.addPackage(String.format("%s.domain", plg.name()));
+            }
+        }
+
+        ebeanServer = EbeanServerFactory.create(serverConfig);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
@@ -98,7 +122,7 @@ public class GrapeApp {
         });
     }
 
-    private static void flyway(List<GrapePlugin> plugins) {
+    private static void flyway() {
         logger.info("Database migration begin.");
         for (GrapePlugin plg : plugins) {
             if (plg.hasEntity()) {
@@ -120,30 +144,18 @@ public class GrapeApp {
         }
     }
 
+    private static void initSpring(String[] args) {
+        logger.info("Init spring begin.");
+        ArrayList<Object> ss = Lists.newArrayList(GrapeApp.class);
+        ss.addAll(plugins.stream().map(GrapePlugin::name).map(Package::getPackage).collect(Collectors.toList()));
+        SpringApplication app = new SpringApplication(ss.toArray());
 
-    private static List<GrapePlugin> loadPlugin() {
-        logger.info("Load pitaya plugin begin.");
-
-        Set<GrapePlugin> set = Sets.newHashSet();
-
-        ServiceLoader<GrapePlugin> plugins = ServiceLoader.load(GrapePlugin.class);
-        for (GrapePlugin plugin : plugins) {
-            logger.info("find pitaya plugin: " + plugin.name());
-            if (set.contains(plugin)) {
-                String msg = String.format("Duplicate plugin: %s, plugin name must be unique.", plugin.name());
-                logger.warn(msg);
-                throw new GrapeException(msg);
-            }
-            set.add(plugin);
-        }
-
-        List<GrapePlugin> list = Lists.newArrayList(set);
-        Collections.sort(list);
-        List<String> on = list.stream().map(GrapePlugin::name).collect(Collectors.toList());
-        logger.info("Plugin order: " + String.join(", ", on));
-        logger.info("Load pitaya plugin end.\n");
-        return list;
+        // init spring
+        logger.info("Loading spring beans, this will take some time, please be patient.");
+        appContext = app.run(args);
+        logger.info("Init spring end.\n");
     }
+
 
     /**
      * Read config in application.properties

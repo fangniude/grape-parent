@@ -12,38 +12,49 @@ import java.util.Set;
  */
 public abstract class GrapePlugin implements Comparable<GrapePlugin> {
 
-    private String name;
-
-    protected String name() {
+    public String name() {
         return getClass().getPackage().getName();
     }
 
-    protected boolean hasEntity() {
+    public boolean hasEntity() {
         return true;
     }
 
-    protected Set<GrapePlugin> dependencies() {
+    public Set<GrapePlugin> dependencies() {
         return Sets.newHashSet();
     }
 
-    protected void inTheBeginning() {
+    public final Set<GrapePlugin> allDependencies() {
+        Set<GrapePlugin> deps = dependencies();
+        if (deps.isEmpty()) {
+            return deps;
+        } else {
+            Set<GrapePlugin> all = Sets.newHashSet(deps);
+            for (GrapePlugin dep : deps) {
+                all.addAll(dep.allDependencies());
+            }
+            return all;
+        }
     }
 
-    protected void afterDataBaseInitial() {
+    public void inTheBeginning() {
     }
 
-    protected void afterSpringInitial(ApplicationContext context) {
+    public void afterDataBaseInitial() {
     }
 
-    protected void afterStarted(ApplicationContext context) {
+    public void afterSpringInitial(ApplicationContext context) {
+    }
+
+    public void afterStarted(ApplicationContext context) {
     }
 
     @Override
     public int compareTo(GrapePlugin o) {
-        if (dependencies().contains(o)) {
-            return -1;
-        } else if (o.dependencies().contains(this)) {
+        if (allDependencies().contains(o)) {
             return 1;
+        } else if (o.allDependencies().contains(this)) {
+            return -1;
         } else {
             return 0;
         }

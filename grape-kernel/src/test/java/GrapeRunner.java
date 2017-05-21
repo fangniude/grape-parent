@@ -1,11 +1,11 @@
-import test.TestPlugin;
+import org.grape.GrapeApp;
 
 /**
  * Created by Lewis
  * 2017-05-20.
  */
-public class Test {
+public class GrapeRunner {
     public static void main(String[] args) {
-        System.out.println(new TestPlugin().name());
+        GrapeApp.start(args);
     }
 }
