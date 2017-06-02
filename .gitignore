@@ -4,6 +4,6 @@
 *.iws
 *.log
 .idea
-.**/logs/**
-.**/target/**
+**/logs/**
+**/target/**
 *.class
