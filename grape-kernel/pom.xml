@@ -39,8 +39,8 @@
             <artifactId>javax.inject</artifactId>
         </dependency>
         <!--<dependency>-->
-            <!--<groupId>com.alibaba</groupId>-->
-            <!--<artifactId>fastjson</artifactId>-->
+        <!--<groupId>com.alibaba</groupId>-->
+        <!--<artifactId>fastjson</artifactId>-->
         <!--</dependency>-->
         <!-- persistence -->
         <dependency>

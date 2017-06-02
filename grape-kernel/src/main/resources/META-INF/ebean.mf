@@ -1,0 +1,3 @@
+transactional-packages: org.grape
+packages: org.grape
+querybean-packages: org.grape

@@ -37,18 +37,17 @@ public class GrapeApp {
     private static ApplicationContext appContext;
 
     static {
+        // set ebean auto enhance
+        if (!AgentLoader.loadAgentFromClasspath("ebean-agent", "debug=1")) {
+            logger.info("ebean-agent not found in classpath - not dynamically loaded");
+        }
+
         // loadProperties
         try (InputStream is = GrapeApp.class.getResourceAsStream("/application.properties")) {
             properties.load(is);
         } catch (IOException e) {
             throw new GrapeException("load application.properties error.", e);
         }
-
-        // setEbeanAutoEnhance
-        AgentLoader.loadAgentFromClasspath("avaje-ebeanorm-agent", "debug=1");
-    }
-
-    private GrapeApp() {
     }
 
     public static void main(String[] args) {
@@ -77,13 +76,13 @@ public class GrapeApp {
     }
 
     private static void loadPlugin() {
-        logger.info("Load pitaya plugin begin.");
+        logger.info("Load grape plugin begin.");
 
         Set<GrapePlugin> set = Sets.newHashSet();
 
         ServiceLoader<GrapePlugin> plgs = ServiceLoader.load(GrapePlugin.class);
         for (GrapePlugin plg : plgs) {
-            logger.info("find pitaya plugin: " + plg.name());
+            logger.info("find grape plugin: " + plg.name());
             if (set.contains(plg)) {
                 String msg = String.format("Duplicate plugin: %s, plugin name must be unique.", plg.name());
                 logger.warn(msg);
@@ -96,7 +95,7 @@ public class GrapeApp {
         Collections.sort(plugins);
         List<String> on = plugins.stream().map(GrapePlugin::name).collect(Collectors.toList());
         logger.info("Plugin order: " + String.join(", ", on));
-        logger.info("Load pitaya plugin end.\n");
+        logger.info("Load grape plugin end.\n");
     }
 
     private static void createEbeanServer() {
@@ -127,15 +126,14 @@ public class GrapeApp {
         for (GrapePlugin plg : plugins) {
             if (plg.hasEntity()) {
                 Flyway flyway = new Flyway();
-                flyway.setLocations(String.format("%s/dbmigration/", plg.name()));
+                flyway.setLocations(String.format("sql/%s/%s/", plg.name(), serverConfig.getDatabasePlatform().getName()));
                 flyway.setTable(plg.name() + "_schema_versions");
                 flyway.setDataSource(serverConfig.getDataSource());
                 flyway.setValidateOnMigrate(false);
                 flyway.setEncoding("UTF-8");
                 flyway.setSqlMigrationPrefix("");
                 flyway.setSqlMigrationSeparator("__");
-                flyway.setSqlMigrationSuffix(String.format("-%s-.sql", serverConfig.getDatabasePlatform()
-                        .getName()));
+                flyway.setSqlMigrationSuffix(".sql");
                 flyway.migrate();
                 logger.info(String.format("Migration plugin %s.", plg.name()));
             } else {

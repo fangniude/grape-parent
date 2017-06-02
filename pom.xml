@@ -6,6 +6,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>grape-kernel</module>
+        <module>grape-dict</module>
     </modules>
 
     <parent>
@@ -34,7 +35,7 @@
             <dependency>
                 <groupId>io.ebean</groupId>
                 <artifactId>ebean</artifactId>
-                <version>10.2.3</version>
+                <version>10.3.1</version>
             </dependency>
             <dependency>
                 <groupId>io.ebean</groupId>

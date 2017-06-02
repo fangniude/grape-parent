@@ -6,6 +6,7 @@ import io.ebean.annotation.UpdatedTimestamp;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
@@ -22,13 +23,14 @@ public abstract class GrapeModel extends Model {
     @Id
     private Long id;
 
+    @Column(name = "primary_key", unique = true, nullable = false, length = 64)
     private String key;
 
     private String name;
 
     private String remark;
 
-    private Boolean auth;
+//    private Boolean auth; todo may be used in data permission
 
     @Version
     private Long version;
@@ -38,4 +40,16 @@ public abstract class GrapeModel extends Model {
 
     @UpdatedTimestamp
     private Timestamp whenUpdated;
+
+    public GrapeModel() {
+    }
+
+    public GrapeModel(String key) {
+        this.key = key;
+    }
+
+    public GrapeModel(String key, String name) {
+        this.key = key;
+        this.name = name;
+    }
 }

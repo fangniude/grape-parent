@@ -1,0 +1,3 @@
+transactional-packages: dict.domain
+packages: dict.domain
+querybean-packages: dict.domain
