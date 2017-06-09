@@ -1,5 +1,6 @@
 package org.grape;
 
+import io.ebean.Ebean;
 import io.ebean.Model;
 import io.ebean.annotation.CreatedTimestamp;
 import io.ebean.annotation.UpdatedTimestamp;
@@ -10,7 +11,8 @@ import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * Created by Lewis
@@ -21,25 +23,25 @@ import java.sql.Timestamp;
 @MappedSuperclass
 public abstract class GrapeModel extends Model {
     @Id
-    private Long id;
+    protected Long id;
 
     @Column(name = "primary_key", unique = true, nullable = false, length = 64)
-    private String key;
+    protected String key;
 
-    private String name;
+    protected String name;
 
-    private String remark;
+    protected String remark;
 
-//    private Boolean auth; todo may be used in data permission
+//    protected Boolean auth; todo may be used in data permission
 
     @Version
-    private Long version;
+    protected Long version;
 
     @CreatedTimestamp
-    private Timestamp whenCreated;
+    protected LocalDateTime whenCreated;
 
     @UpdatedTimestamp
-    private Timestamp whenUpdated;
+    protected LocalDateTime whenUpdated;
 
     public GrapeModel() {
     }
