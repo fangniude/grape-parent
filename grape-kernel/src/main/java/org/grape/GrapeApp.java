@@ -8,6 +8,12 @@ import io.ebean.EbeanServerFactory;
 import io.ebean.config.ServerConfig;
 import org.avaje.agentloader.AgentLoader;
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.internal.dbsupport.DbSupport;
+import org.flywaydb.core.internal.dbsupport.DbSupportFactory;
+import org.flywaydb.core.internal.dbsupport.Schema;
+import org.flywaydb.core.internal.metadatatable.MetaDataTable;
+import org.flywaydb.core.internal.metadatatable.MetaDataTableImpl;
+import org.flywaydb.core.internal.util.jdbc.JdbcUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +21,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.util.ReflectionUtils;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.sql.Connection;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -50,6 +60,10 @@ public class GrapeApp {
         }
     }
 
+    public GrapeApp() {
+        // spring boot use it
+    }
+
     public static void main(String[] args) {
         start(args);
     }
@@ -63,7 +77,6 @@ public class GrapeApp {
         plugins.forEach(GrapePlugin::afterDataBaseInitial);
 
         initSpring(args);
-        plugins.forEach(plg -> plg.afterSpringInitial(appContext));
 
         // start success
         logger.info("\r\n*******************************************\r\n" //
@@ -125,6 +138,8 @@ public class GrapeApp {
         logger.info("Database migration begin.");
         for (GrapePlugin plg : plugins) {
             if (plg.hasEntity()) {
+                addMetaTableIfNotExist(serverConfig.getDataSource(), plg.name());
+
                 Flyway flyway = new Flyway();
                 flyway.setLocations(String.format("sql/%s/%s/", plg.name(), serverConfig.getDatabasePlatform().getName()));
                 flyway.setTable(plg.name() + "_schema_versions");
@@ -140,6 +155,24 @@ public class GrapeApp {
                 logger.info(String.format("Ignore migration: %s", plg.name()));
             }
         }
+    }
+
+    /**
+     * By default, one flyway schema mapping one database schema,
+     * and flyway not provide many flyway schema mapping one database schema configuration method,
+     * but, if the meta table exist, flyway will work fine for supporting multi flyway schema in one database schema.
+     * so, create the table if not exist.
+     */
+    private static void addMetaTableIfNotExist(DataSource dataSource, String name) {
+        Connection connection = JdbcUtils.openConnection(dataSource);
+
+        DbSupport dbSupport = DbSupportFactory.createDbSupport(connection, true);
+        Schema currentSchema = dbSupport.getOriginalSchema();
+
+        MetaDataTable metaDataTable = new MetaDataTableImpl(dbSupport, currentSchema.getTable(name + "_schema_versions"), "system");
+        Method method = ReflectionUtils.findMethod(MetaDataTableImpl.class, "createIfNotExists");
+        ReflectionUtils.makeAccessible(method);
+        ReflectionUtils.invokeMethod(method, metaDataTable);
     }
 
     private static void initSpring(String[] args) {

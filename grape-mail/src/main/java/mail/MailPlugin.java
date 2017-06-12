@@ -1,12 +1,14 @@
 package mail;
 
+import com.google.auto.service.AutoService;
 import com.google.common.collect.Sets;
 import msg.MsgPlugin;
 import org.grape.GrapePlugin;
 
 import java.util.Set;
 
-public class MailPlugin extends GrapePlugin {
+@AutoService(GrapePlugin.class)
+public final class MailPlugin extends GrapePlugin {
     @Override
     public boolean hasEntity() {
         return false;

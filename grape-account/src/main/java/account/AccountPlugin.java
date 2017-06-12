@@ -1,6 +1,7 @@
 package account;
 
 import account.domain.Account;
+import com.google.auto.service.AutoService;
 import com.google.common.collect.Sets;
 import mail.MailPlugin;
 import org.grape.GrapeApp;
@@ -12,7 +13,8 @@ import java.util.Set;
 import static account.domain.Account.ADMIN_ACCOUNT;
 import static account.domain.Account.GUEST_ACCOUNT;
 
-public class AccountPlugin extends GrapePlugin {
+@AutoService(GrapePlugin.class)
+public final class AccountPlugin extends GrapePlugin {
     public static String secretKey() {
         return GrapeApp.getProperty("account.secretKey", "account.secretKey.default");
     }
@@ -33,21 +35,19 @@ public class AccountPlugin extends GrapePlugin {
             Account acc = new Account();
             acc.setKey(ADMIN_ACCOUNT);
             acc.setPassword("123456");
-            acc.encrypt();
             acc.save();
             admin = Account.finder.byKey(ADMIN_ACCOUNT);
         }
-        admin.ifPresent(a -> Account.adminId = a.getId());
+        admin.ifPresent(a -> Account.setAdminId(a.getId()));
 
         Optional<Account> guest = Account.finder.byKey(GUEST_ACCOUNT);
         if (!guest.isPresent()) {
             Account acc = new Account();
             acc.setKey(GUEST_ACCOUNT);
             acc.setPassword("123456");
-            acc.encrypt();
             acc.save();
             guest = Account.finder.byKey(GUEST_ACCOUNT);
         }
-        guest.ifPresent(a -> Account.guestId = a.getId());
+        guest.ifPresent(a -> Account.setGuestId(a.getId()));
     }
 }

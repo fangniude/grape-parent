@@ -1,6 +1,5 @@
 package org.grape;
 
-import io.ebean.Ebean;
 import io.ebean.Model;
 import io.ebean.annotation.CreatedTimestamp;
 import io.ebean.annotation.UpdatedTimestamp;
@@ -12,7 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 /**
  * Created by Lewis

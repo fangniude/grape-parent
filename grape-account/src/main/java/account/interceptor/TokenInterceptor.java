@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Component
-public class TokenInterceptor extends HandlerInterceptorAdapter {
+public final class TokenInterceptor extends HandlerInterceptorAdapter {
     private final String authHeader = AccountPlugin.authHeader();
 
     @Override

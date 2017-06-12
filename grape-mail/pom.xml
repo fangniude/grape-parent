@@ -22,9 +22,9 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
         <!--<dependency>-->
-            <!--<groupId>javax.mail</groupId>-->
-            <!--<artifactId>javax.mail-api</artifactId>-->
-            <!--&lt;!&ndash;<version>1.5.6</version>&ndash;&gt;-->
+        <!--<groupId>javax.mail</groupId>-->
+        <!--<artifactId>javax.mail-api</artifactId>-->
+        <!--&lt;!&ndash;<version>1.5.6</version>&ndash;&gt;-->
         <!--</dependency>-->
 
         <!--<dependency>-->

@@ -2,6 +2,7 @@ package account.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.grape.GrapeException;
 import org.grape.GrapeFinder;
 import org.grape.GrapeModel;
 
@@ -22,14 +23,20 @@ import java.util.Optional;
 @Setter
 @Entity
 @Table(name = "account_account")
-public class Account extends GrapeModel {
-    public static final String ADMIN_ACCOUNT = "admin";
-    public static final String GUEST_ACCOUNT = "guest";
+public final class Account extends GrapeModel {
     public static final GrapeFinder<Account> finder = new GrapeFinder<>(Account.class);
 
-    private static ThreadLocal<Long> currentAccountId = new ThreadLocal<>();
-    public static Long adminId;
-    public static Long guestId;
+    private static final ThreadLocal<Long> currentAccountId = new ThreadLocal<>();
+    public static final String ADMIN_ACCOUNT = "admin";
+    public static final String GUEST_ACCOUNT = "guest";
+
+    @Getter
+    @Setter
+    private static Long adminId;
+
+    @Getter
+    @Setter
+    private static Long guestId;
 
     @Column(length = 64)
     private String mail;
@@ -42,63 +49,6 @@ public class Account extends GrapeModel {
 
     @Column(length = 16)
     private String salt;
-
-    public void setDefaultKey() {
-        if (phone != null && !phone.trim().isEmpty()) {
-            this.key = phone;
-        } else if (mail != null && !mail.trim().isEmpty()) {
-            this.key = mail;
-        }
-    }
-
-    public void encrypt() {
-        this.salt = salt();
-        this.password = encrypt(this.password, this.salt);
-    }
-
-    public boolean authenticate(String pwd) {
-        return encrypt(pwd, salt).equals(password);
-    }
-
-    public static Optional<Account> findByAccount(String acc) {
-        return finder.query().where().or().eq("primary_key", acc).eq("mail", acc).eq("phone", acc).findOneOrEmpty();
-    }
-
-    private static String encrypt(String password, String salt) {
-        try {
-            String algorithm = "PBKDF2WithHmacSHA1";
-            SecretKeyFactory f = SecretKeyFactory.getInstance(algorithm);
-
-            int derivedKeyLength = 160;
-            int iterations = 20000;
-            KeySpec spec = new PBEKeySpec(password.toCharArray(), toBytes(salt), iterations, derivedKeyLength);
-
-            SecretKey secretKey = f.generateSecret(spec);
-            return toString(secretKey.getEncoded());
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static String salt() {
-        try {
-            SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-
-            byte[] salt = new byte[8];
-            random.nextBytes(salt);
-            return toString(salt);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static String toString(byte[] bytes) {
-        return Base64.getEncoder().encodeToString(bytes);
-    }
-
-    private static byte[] toBytes(String str) {
-        return Base64.getDecoder().decode(str);
-    }
 
     public static void setCurrent(Long accountId) {
         currentAccountId.set(accountId);
@@ -114,6 +64,56 @@ public class Account extends GrapeModel {
             return id;
         } else {
             return guestId;
+        }
+    }
+
+    public static Optional<Account> findByAccount(String acc) {
+        return finder.query().where().or().eq("primary_key", acc).eq("mail", acc).eq("phone", acc).findOneOrEmpty();
+    }
+
+    @Override
+    public void save() {
+        this.salt = salt();
+        this.password = encrypt(this.password, this.salt);
+        super.save();
+    }
+
+    @Override
+    public void update() {
+        this.salt = salt();
+        this.password = encrypt(this.password, this.salt);
+        super.update();
+    }
+
+    public boolean authenticate(String pwd) {
+        return encrypt(pwd, salt).equals(password);
+    }
+
+    private static String salt() {
+        try {
+            SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+
+            byte[] salt = new byte[8];
+            random.nextBytes(salt);
+            return Base64.getEncoder().encodeToString(salt);
+        } catch (NoSuchAlgorithmException e) {
+            throw new GrapeException(e);
+        }
+    }
+
+    private static String encrypt(String password, String salt) {
+        try {
+            String algorithm = "PBKDF2WithHmacSHA1";
+            SecretKeyFactory f = SecretKeyFactory.getInstance(algorithm);
+
+            int derivedKeyLength = 160;
+            int iterations = 20000;
+            KeySpec spec = new PBEKeySpec(password.toCharArray(), Base64.getDecoder().decode(salt), iterations, derivedKeyLength);
+
+            SecretKey secretKey = f.generateSecret(spec);
+            return Base64.getEncoder().encodeToString(secretKey.getEncoded());
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new GrapeException(e);
         }
     }
 }

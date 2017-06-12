@@ -7,7 +7,10 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.util.Date;
 
-public class Tokens {
+public final class Tokens {
+    private Tokens() {
+    }
+
     public static String newToken(Long accountId) {
         return Jwts.builder()
                 .claim("accountId", accountId)

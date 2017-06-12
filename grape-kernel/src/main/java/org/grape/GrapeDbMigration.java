@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class GrapeDbMigration extends DbMigration {
+public final class GrapeDbMigration extends DbMigration {
     public GrapeDbMigration() {
         // set ebean auto enhance
         if (!AgentLoader.loadAgentFromClasspath("ebean-agent", "debug=1")) {

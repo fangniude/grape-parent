@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("dict")
-public class DictApi {
+public final class DictApi {
     @RequestMapping(value = "", method = RequestMethod.GET)
     public HttpStatus list() {
         return HttpStatus.CREATED;

@@ -1,6 +1,7 @@
 package org.grape;
 
 import com.google.common.collect.Sets;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Objects;
@@ -20,11 +21,11 @@ public abstract class GrapePlugin implements Comparable<GrapePlugin> {
         return true;
     }
 
-    public Set<GrapePlugin> dependencies() {
+    protected Set<GrapePlugin> dependencies() {
         return Sets.newHashSet();
     }
 
-    public final Set<GrapePlugin> allDependencies() {
+    private Set<GrapePlugin> allDependencies() {
         Set<GrapePlugin> deps = dependencies();
         if (deps.isEmpty()) {
             return deps;
@@ -37,20 +38,17 @@ public abstract class GrapePlugin implements Comparable<GrapePlugin> {
         }
     }
 
-    public void inTheBeginning() {
+    protected void inTheBeginning() {
     }
 
-    public void afterDataBaseInitial() {
+    protected void afterDataBaseInitial() {
     }
 
-    public void afterSpringInitial(ApplicationContext context) {
-    }
-
-    public void afterStarted(ApplicationContext context) {
+    protected void afterStarted(ApplicationContext context) {
     }
 
     @Override
-    public int compareTo(GrapePlugin o) {
+    public int compareTo(@NotNull GrapePlugin o) {
         if (allDependencies().contains(o)) {
             return 1;
         } else if (o.allDependencies().contains(this)) {
@@ -62,8 +60,12 @@ public abstract class GrapePlugin implements Comparable<GrapePlugin> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         GrapePlugin that = (GrapePlugin) o;
         return Objects.equals(name(), that.name());
     }

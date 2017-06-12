@@ -1,9 +1,8 @@
-package mail.service;
+package mail;
 
-import mail.MailConfig;
 import msg.Msg;
 import msg.MsgType;
-import msg.service.MsgTypeService;
+import msg.MsgTypeService;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,7 @@ import javax.inject.Inject;
 import java.util.Properties;
 
 @Service
-public class MailService implements MsgTypeService {
+public final class MailService implements MsgTypeService {
     private JavaMailSenderImpl sender = new JavaMailSenderImpl();
     private MailConfig config;
 

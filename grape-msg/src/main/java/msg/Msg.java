@@ -1,6 +1,6 @@
 package msg;
 
-public class Msg {
+public final class Msg {
     public final String destination;
     public final String title;
     public final String content;

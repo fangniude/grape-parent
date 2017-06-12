@@ -12,7 +12,7 @@ import javax.persistence.Table;
 @Setter
 @Entity
 @Table(name = "dict_dict")
-public class Dict extends GrapeModel {
+public final class Dict extends GrapeModel {
     @Column(nullable = false, length = 32)
     private String category;
 
@@ -20,6 +20,7 @@ public class Dict extends GrapeModel {
     private String value;
 
     public Dict() {
+        // add for json or other libs
     }
 
     public Dict(String category, String value) {

@@ -1,6 +1,8 @@
 package dict;
 
+import com.google.auto.service.AutoService;
 import org.grape.GrapePlugin;
 
-public class DictPlugin extends GrapePlugin {
+@AutoService(GrapePlugin.class)
+public final class DictPlugin extends GrapePlugin {
 }

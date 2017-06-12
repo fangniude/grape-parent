@@ -4,16 +4,11 @@ import io.ebean.Finder;
 
 import java.util.Optional;
 
-public class GrapeFinder<T> extends Finder<Long, T> {
+public final class GrapeFinder<T> extends Finder<Long, T> {
     private final Class<T> type;
 
     public GrapeFinder(Class<T> type) {
         super(type);
-        this.type = type;
-    }
-
-    public GrapeFinder(Class<T> type, String serverName) {
-        super(type, serverName);
         this.type = type;
     }
 
