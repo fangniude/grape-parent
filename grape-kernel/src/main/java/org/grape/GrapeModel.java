@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * Created by Lewis
@@ -51,5 +52,22 @@ public abstract class GrapeModel extends Model {
     public GrapeModel(String key, String name) {
         this.key = key;
         this.name = name;
+    }
+
+    public static class Finder<T> extends io.ebean.Finder<Long, T> {
+        protected final Class<T> type;
+
+        public Finder(Class<T> type) {
+            super(type);
+            this.type = type;
+        }
+
+        public Optional<T> byIdo(Long id) {
+            return Optional.ofNullable(byId(id));
+        }
+
+        public Optional<T> byKey(String key) {
+            return db().find(type).where().eq("primary_key", key).findOneOrEmpty();
+        }
     }
 }

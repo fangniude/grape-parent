@@ -33,6 +33,7 @@
         <module>grape-account</module>
         <module>grape-msg</module>
         <module>grape-mail</module>
+        <module>grape-permission</module>
     </modules>
 
     <dependencyManagement>

@@ -3,7 +3,6 @@ package account.domain;
 import lombok.Getter;
 import lombok.Setter;
 import org.grape.GrapeException;
-import org.grape.GrapeFinder;
 import org.grape.GrapeModel;
 
 import javax.crypto.SecretKey;
@@ -24,7 +23,7 @@ import java.util.Optional;
 @Entity
 @Table(name = "account_account")
 public final class Account extends GrapeModel {
-    public static final GrapeFinder<Account> finder = new GrapeFinder<>(Account.class);
+    public static final Finder<Account> finder = new Finder<>(Account.class);
 
     private static final ThreadLocal<Long> currentAccountId = new ThreadLocal<>();
     public static final String ADMIN_ACCOUNT = "admin";
