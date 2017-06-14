@@ -10,16 +10,16 @@ import io.ebean.event.BeanQueryRequest;
 import org.grape.GrapeResource;
 import org.grape.RelationResource;
 
-public class ResourceQueryAdapter implements BeanQueryAdapter {
+public class RelationResourceQueryAdapter implements BeanQueryAdapter {
 
     @Override
     public boolean isRegisterFor(Class<?> cls) {
-        return GrapeResource.class.isAssignableFrom(cls) && cls.getAnnotation(RelationResource.class) == null;
+        return GrapeResource.class.isAssignableFrom(cls) && cls.getAnnotation(RelationResource.class) != null;
     }
 
     @Override
     public int getExecutionOrder() {
-        return 0;
+        return 1;
     }
 
     @Override
@@ -36,7 +36,7 @@ public class ResourceQueryAdapter implements BeanQueryAdapter {
 
         Junction<?> jun = query.where().or();
 
-        // 0. if 1,2,3 not match, return empty
+        // 0. if 1,2 not match, return empty
         jun.eq("id", -1);
 
         // 1. if personal resource, add his(her) own data
@@ -44,11 +44,8 @@ public class ResourceQueryAdapter implements BeanQueryAdapter {
             jun.eq("account_id", Account.current());
         }
 
-        // 2. add account resource relation
-        jun.in("id", AccountResourceRelation.findResourceIdsByClsAccountQuery(aClass.getName(), Account.current()));
-
-        // 3. add role resource relation
-        jun.in("id", RoleResourceRelation.findResourceIdsByClsAccount(aClass.getName(), Account.current()));
+        // 2. by resource relation
+        jun.in("id", ResourceModel.findAllResourceIdsByAccountCls(Account.current(), aClass.getName()));
 
     }
 }

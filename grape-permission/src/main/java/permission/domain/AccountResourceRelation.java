@@ -9,6 +9,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -26,15 +28,37 @@ public class AccountResourceRelation extends GrapeModel {
     @Column(name = "resource_id", nullable = false, updatable = false)
     private Long resourceId;
 
-    public static List<AccountResourceRelation> findByAccount(String cls, Long id) {
-        return findByAccountQuery(cls, id).findList();
+    public ResourceModel resource() {
+        return new ResourceModel(resourceCls, resourceId);
     }
 
-    public static Query<AccountResourceRelation> findResourceIdsByAccountQuery(String cls, Long id) {
-        return findByAccountQuery(cls, id).select("resource_id");
+    public static Set<ResourceModel> findResourceByAccount(Long id) {
+        return findByAccount(id).stream()
+                .map(AccountResourceRelation::resource)
+                .collect(Collectors.toSet());
     }
 
-    public static Query<AccountResourceRelation> findByAccountQuery(String cls, Long id) {
+    public static List<AccountResourceRelation> findByAccount(Long id) {
+        return findByAccountQuery(id).findList();
+    }
+
+    public static Query<AccountResourceRelation> findResourceIdsByAccountQuery(Long id) {
+        return findByAccountQuery(id).select("resource_id");
+    }
+
+    public static Query<AccountResourceRelation> findByAccountQuery(Long id) {
+        return AccountResourceRelation.finder.query().where().eq("account_id", id).query();
+    }
+
+    public static List<AccountResourceRelation> findByClsAccount(String cls, Long id) {
+        return findByClsAccountQuery(cls, id).findList();
+    }
+
+    public static Query<AccountResourceRelation> findResourceIdsByClsAccountQuery(String cls, Long id) {
+        return findByClsAccountQuery(cls, id).select("resource_id");
+    }
+
+    public static Query<AccountResourceRelation> findByClsAccountQuery(String cls, Long id) {
         return AccountResourceRelation.finder.query().where().and().eq("resource_cls", cls).eq("account_id", id).query();
     }
 }

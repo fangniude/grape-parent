@@ -1,6 +1,7 @@
 package org.grape;
 
 import io.ebean.Model;
+import io.ebean.annotation.Cache;
 import io.ebean.annotation.CreatedTimestamp;
 import io.ebean.annotation.UpdatedTimestamp;
 import lombok.Getter;
@@ -19,6 +20,7 @@ import java.util.Optional;
  */
 @Getter
 @Setter
+@Cache(naturalKey = "primary_key")
 @MappedSuperclass
 public abstract class GrapeModel extends Model {
     @Id
