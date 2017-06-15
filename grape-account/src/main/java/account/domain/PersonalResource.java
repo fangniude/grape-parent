@@ -12,7 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 @MappedSuperclass
-public class PersonalResource extends GrapeResource {
+public abstract class PersonalResource extends GrapeResource {
     @Column(name = "account_id", nullable = false, updatable = false)
     private Long accountId;
 

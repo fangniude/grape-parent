@@ -32,9 +32,7 @@ public final class AccountPlugin extends GrapePlugin {
     public void afterDataBaseInitial() {
         Optional<Account> admin = Account.finder.byKey(ADMIN_ACCOUNT);
         if (!admin.isPresent()) {
-            Account acc = new Account();
-            acc.setKey(ADMIN_ACCOUNT);
-            acc.setPassword("123456");
+            Account acc = new Account(ADMIN_ACCOUNT, "123456");
             acc.save();
             admin = Account.finder.byKey(ADMIN_ACCOUNT);
         }
@@ -42,9 +40,7 @@ public final class AccountPlugin extends GrapePlugin {
 
         Optional<Account> guest = Account.finder.byKey(GUEST_ACCOUNT);
         if (!guest.isPresent()) {
-            Account acc = new Account();
-            acc.setKey(GUEST_ACCOUNT);
-            acc.setPassword("123456");
+            Account acc = new Account(GUEST_ACCOUNT, "123456");
             acc.save();
             guest = Account.finder.byKey(GUEST_ACCOUNT);
         }

@@ -1,9 +1,13 @@
 package account.domain;
 
+import com.google.common.base.Strings;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.grape.GrapeException;
 import org.grape.GrapeModel;
+import org.jetbrains.annotations.NotNull;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -20,6 +24,8 @@ import java.util.Optional;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "account_account")
 public final class Account extends GrapeModel {
@@ -49,6 +55,29 @@ public final class Account extends GrapeModel {
     @Column(length = 16)
     private String salt;
 
+    public Account(String key, String password) {
+        super(key);
+        this.password = password;
+    }
+
+    @NotNull
+    @Override
+    public String key() {
+        if (Strings.isNullOrEmpty(super.key)) {
+            if (Strings.isNullOrEmpty(this.mail)) {
+                if (Strings.isNullOrEmpty(this.phone)) {
+                    throw new GrapeException("account, mail, phone all null.");
+                } else {
+                    return this.phone;
+                }
+            } else {
+                return this.mail;
+            }
+        } else {
+            return super.key;
+        }
+    }
+
     public static void setCurrent(Long accountId) {
         currentAccountId.set(accountId);
     }
@@ -68,6 +97,13 @@ public final class Account extends GrapeModel {
 
     public static Optional<Account> findByAccount(String acc) {
         return finder.query().where().or().eq("primary_key", acc).eq("mail", acc).eq("phone", acc).findOneOrEmpty();
+    }
+
+    @Override
+    public void insert() {
+        this.salt = salt();
+        this.password = encrypt(this.password, this.salt);
+        super.save();
     }
 
     @Override

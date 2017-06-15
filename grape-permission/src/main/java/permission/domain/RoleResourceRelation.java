@@ -1,22 +1,28 @@
 package permission.domain;
 
 import io.ebean.Query;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.grape.GrapeModel;
+import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "permission_role_resource_relation")
-public class RoleResourceRelation extends GrapeModel {
+public final class RoleResourceRelation extends GrapeModel {
     public static final Finder<RoleResourceRelation> finder = new Finder<>(RoleResourceRelation.class);
 
     @Column(name = "role_id", nullable = false, updatable = false)
@@ -28,6 +34,11 @@ public class RoleResourceRelation extends GrapeModel {
     @Column(name = "resource_id", nullable = false, updatable = false)
     private Long resourceId;
 
+    @NotNull
+    @Override
+    public String key() {
+        return String.format("role:%d, cls: %s, resource: %d", roleId, resourceCls, resourceId);
+    }
 
     public ResourceModel resource() {
         return new ResourceModel(resourceCls, resourceId);

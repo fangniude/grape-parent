@@ -3,6 +3,7 @@ package permission.domain;
 import com.google.common.collect.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.util.Collection;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Set;
 
 @AllArgsConstructor
 @EqualsAndHashCode
+@ToString
 public final class ResourceModel {
     public final String cls;
     public final Long id;

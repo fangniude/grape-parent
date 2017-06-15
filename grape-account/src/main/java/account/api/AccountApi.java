@@ -52,9 +52,7 @@ public final class AccountApi {
             return false;
         }
 
-        Account acc = new Account();
-        acc.setKey(account);
-        acc.setPassword(pwd);
+        Account acc = new Account(account, pwd);
         switch (type) {
             case SMS:
                 acc.setPhone(account);

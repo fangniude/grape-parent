@@ -1,9 +1,13 @@
 package permission.domain;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Sets;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.grape.GrapeModel;
+import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -14,6 +18,8 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "permission_resource_relation")
 public final class ResourceRelation extends GrapeModel {
@@ -23,6 +29,12 @@ public final class ResourceRelation extends GrapeModel {
     private Long parentId;
     private String childCls;
     private Long childId;
+
+    @NotNull
+    @Override
+    public String key() {
+        return String.format("parentCls:%s,id:%d,childCls:%s,id:%d", parentCls, parentId, childCls, childId);
+    }
 
     public ResourceModel parent() {
         return new ResourceModel(parentCls, parentId);
@@ -62,13 +74,21 @@ public final class ResourceRelation extends GrapeModel {
     }
 
     public static Set<ResourceModel> allChildren(List<ResourceRelation> allRR, Set<ResourceModel> rms) {
-        Set<ResourceModel> children = rms.stream()
-                .map(rm -> ResourceRelation.children(allRR, rm))
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+        if (rms.isEmpty()) {
+            return Sets.newHashSet();
+        } else {
+            Set<ResourceModel> children = rms.stream()
+                    .map(rm -> ResourceRelation.children(allRR, rm))
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet());
 
-        Set<ResourceModel> allChildren = ResourceRelation.allChildren(allRR, children);
+            if (children.isEmpty()) {
+                return Sets.newHashSet();
+            } else {
+                Set<ResourceModel> allChildren = ResourceRelation.allChildren(allRR, children);
 
-        return Sets.union(rms, allChildren);
+                return Sets.union(rms, allChildren);
+            }
+        }
     }
 }

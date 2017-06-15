@@ -10,7 +10,7 @@ import io.ebean.event.BeanQueryRequest;
 import org.grape.GrapeResource;
 import org.grape.RelationResource;
 
-public class RelationResourceQueryAdapter implements BeanQueryAdapter {
+public final class RelationResourceQueryAdapter implements BeanQueryAdapter {
 
     @Override
     public boolean isRegisterFor(Class<?> cls) {

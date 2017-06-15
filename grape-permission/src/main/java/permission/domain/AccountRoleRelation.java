@@ -1,9 +1,12 @@
 package permission.domain;
 
 import io.ebean.Query;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.grape.GrapeModel;
+import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,9 +14,11 @@ import javax.persistence.Table;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "permission_account_role_relation")
-public class AccountRoleRelation extends GrapeModel {
+public final class AccountRoleRelation extends GrapeModel {
     public static final Finder<AccountRoleRelation> finder = new Finder<>(AccountRoleRelation.class);
 
     @Column(name = "account_id", nullable = false, updatable = false)
@@ -21,6 +26,12 @@ public class AccountRoleRelation extends GrapeModel {
 
     @Column(name = "role_id", nullable = false, updatable = false)
     private Long roleId;
+
+    @NotNull
+    @Override
+    public String key() {
+        return String.format("account:%d,role:%d", accountId, roleId);
+    }
 
     public static Query<AccountRoleRelation> findRoleIdsByAccount(Long id) {
         return findByAccount(id).select("role_id");

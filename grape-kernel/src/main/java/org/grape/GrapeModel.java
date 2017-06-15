@@ -6,6 +6,7 @@ import io.ebean.annotation.CreatedTimestamp;
 import io.ebean.annotation.UpdatedTimestamp;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -44,7 +45,7 @@ public abstract class GrapeModel extends Model {
     @UpdatedTimestamp
     protected LocalDateTime whenUpdated;
 
-    public GrapeModel() {
+    protected GrapeModel() {
     }
 
     public GrapeModel(String key) {
@@ -54,6 +55,27 @@ public abstract class GrapeModel extends Model {
     public GrapeModel(String key, String name) {
         this.key = key;
         this.name = name;
+    }
+
+    @NotNull
+    public abstract String key();
+
+    @Override
+    public void save() {
+        this.key = key();
+        super.save();
+    }
+
+    @Override
+    public void update() {
+        this.key = key();
+        super.update();
+    }
+
+    @Override
+    public void insert() {
+        this.key = key();
+        super.insert();
     }
 
     public static class Finder<T> extends io.ebean.Finder<Long, T> {
