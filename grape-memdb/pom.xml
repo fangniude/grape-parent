@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>grape-account</artifactId>
+    <artifactId>grape-memdb</artifactId>
     <dependencies>
         <dependency>
             <groupId>org.grape</groupId>
@@ -17,19 +17,15 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.grape</groupId>
-            <artifactId>grape-mail</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.googlecode.xmemcached</groupId>
+            <artifactId>xmemcached</artifactId>
+            <version>2.3.1</version>
         </dependency>
         <dependency>
-            <groupId>org.grape</groupId>
-            <artifactId>grape-memdb</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
-            <version>0.7.0</version>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
         </dependency>
     </dependencies>
+
+
 </project>

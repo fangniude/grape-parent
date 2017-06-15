@@ -25,6 +25,7 @@
         <java.encoding>UTF-8</java.encoding>
         <project.build.sourceEncoding>${java.encoding}</project.build.sourceEncoding>
         <flyway.version>4.2.0</flyway.version>
+        <fastjson.version>1.2.33</fastjson.version>
     </properties>
 
     <modules>
@@ -34,6 +35,7 @@
         <module>grape-msg</module>
         <module>grape-mail</module>
         <module>grape-permission</module>
+        <module>grape-memdb</module>
     </modules>
 
     <dependencyManagement>
@@ -52,6 +54,11 @@
                 <groupId>org.avaje</groupId>
                 <artifactId>avaje-agentloader</artifactId>
                 <version>2.1.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

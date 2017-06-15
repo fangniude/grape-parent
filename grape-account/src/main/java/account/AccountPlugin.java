@@ -4,6 +4,7 @@ import account.domain.Account;
 import com.google.auto.service.AutoService;
 import com.google.common.collect.Sets;
 import mail.MailPlugin;
+import memdb.MemdbPlugin;
 import org.grape.GrapeApp;
 import org.grape.GrapePlugin;
 
@@ -25,7 +26,7 @@ public final class AccountPlugin extends GrapePlugin {
 
     @Override
     public Set<GrapePlugin> dependencies() {
-        return Sets.newHashSet(new MailPlugin());
+        return Sets.newHashSet(new MailPlugin(), new MemdbPlugin());
     }
 
     @Override

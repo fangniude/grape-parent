@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Component
 @PropertySource("classpath:application.properties")
-public final class MailConfig {
+final class MailConfig {
     @Value("${mail.host:127.0.0.1}")
     private String host;
 
