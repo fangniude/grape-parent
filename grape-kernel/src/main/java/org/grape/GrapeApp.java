@@ -93,6 +93,10 @@ public class GrapeApp {
     }
 
     public static void main(String[] args) {
+        start(args);
+    }
+
+    public static void start(String[] args) {
         plugins.forEach(GrapePlugin::inTheBeginning);
 
         createEbeanServer();
