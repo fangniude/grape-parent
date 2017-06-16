@@ -1,11 +1,13 @@
 package org.grape;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.ebean.EbeanServer;
 import io.ebean.EbeanServerFactory;
 import io.ebean.config.ServerConfig;
+import lombok.NoArgsConstructor;
 import org.avaje.agentloader.AgentLoader;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.internal.dbsupport.DbSupport;
@@ -35,13 +37,14 @@ import java.util.stream.Collectors;
  * Created by Lewis
  * 2017-05-20.
  */
+@NoArgsConstructor
 @SpringBootApplication
 @PropertySource("classpath:application.properties")
 public class GrapeApp {
     private static final Logger logger = LoggerFactory.getLogger(GrapeApp.class);
 
-    private static final Properties properties = new Properties();
-    private static final List<GrapePlugin> plugins = Lists.newArrayList();
+    private static final Properties properties = loadProperties();
+    private static final ImmutableList<GrapePlugin> plugins = loadPlugins();
     private static final ServerConfig serverConfig = new ServerConfig();
     private static EbeanServer ebeanServer;
     private static ApplicationContext appContext;
@@ -51,25 +54,45 @@ public class GrapeApp {
         if (!AgentLoader.loadAgentFromClasspath("ebean-agent", "debug=1")) {
             logger.info("ebean-agent not found in classpath - not dynamically loaded");
         }
+    }
 
-        // loadProperties
+    private static Properties loadProperties() {
+        Properties p = new Properties();
         try (InputStream is = GrapeApp.class.getResourceAsStream("/application.properties")) {
-            properties.load(is);
+            p.load(is);
+            return p;
         } catch (IOException e) {
             throw new GrapeException("load application.properties error.", e);
         }
     }
 
-    public GrapeApp() {
-        // spring boot use it
+    @NotNull
+    private static ImmutableList<GrapePlugin> loadPlugins() {
+        logger.info("Load grape plugin begin.");
+        Set<GrapePlugin> set = Sets.newHashSet();
+
+        ServiceLoader<GrapePlugin> plgs = ServiceLoader.load(GrapePlugin.class);
+        for (GrapePlugin plg : plgs) {
+            logger.info("find grape plugin: " + plg.name());
+            if (set.contains(plg)) {
+                String msg = String.format("Duplicate plugin: %s, plugin name must be unique.", plg.name());
+                logger.warn(msg);
+                throw new GrapeException(msg);
+            }
+            set.add(plg);
+        }
+
+        ArrayList<GrapePlugin> list = Lists.newArrayList(set);
+        Collections.sort(list);
+
+        List<String> on = list.stream().map(GrapePlugin::name).collect(Collectors.toList());
+        logger.info("Plugin order: " + String.join(", ", on));
+        logger.info("Load grape plugin end.\n");
+
+        return ImmutableList.copyOf(list);
     }
 
     public static void main(String[] args) {
-        start(args);
-    }
-
-    public static void start(String[] args) {
-        loadPlugin();
         plugins.forEach(GrapePlugin::inTheBeginning);
 
         createEbeanServer();
@@ -86,29 +109,6 @@ public class GrapeApp {
 
 
         plugins.forEach(plg -> plg.afterStarted(appContext));
-    }
-
-    private static void loadPlugin() {
-        logger.info("Load grape plugin begin.");
-
-        Set<GrapePlugin> set = Sets.newHashSet();
-
-        ServiceLoader<GrapePlugin> plgs = ServiceLoader.load(GrapePlugin.class);
-        for (GrapePlugin plg : plgs) {
-            logger.info("find grape plugin: " + plg.name());
-            if (set.contains(plg)) {
-                String msg = String.format("Duplicate plugin: %s, plugin name must be unique.", plg.name());
-                logger.warn(msg);
-                throw new GrapeException(msg);
-            }
-            set.add(plg);
-        }
-
-        plugins.addAll(set);
-        Collections.sort(plugins);
-        List<String> on = plugins.stream().map(GrapePlugin::name).collect(Collectors.toList());
-        logger.info("Plugin order: " + String.join(", ", on));
-        logger.info("Load grape plugin end.\n");
     }
 
     private static void createEbeanServer() {

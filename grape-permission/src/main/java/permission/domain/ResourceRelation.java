@@ -1,6 +1,5 @@
 package permission.domain;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
