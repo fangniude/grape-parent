@@ -1,0 +1,3 @@
+transactional-packages: permission.domain
+packages: permission.domain
+querybean-packages: permission.domain

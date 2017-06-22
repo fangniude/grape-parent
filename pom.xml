@@ -36,6 +36,7 @@
         <module>grape-mail</module>
         <module>grape-permission</module>
         <module>grape-memdb</module>
+        <module>grape-group</module>
     </modules>
 
     <dependencyManagement>

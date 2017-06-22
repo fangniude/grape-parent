@@ -1,0 +1,3 @@
+transactional-packages: group.domain
+packages: group.domain
+querybean-packages: group.domain

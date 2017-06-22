@@ -1,5 +1,8 @@
 package permission.domain;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -89,5 +92,14 @@ public final class ResourceRelation extends GrapeModel {
                 return Sets.union(rms, allChildren);
             }
         }
+    }
+
+    public static Multimap<String, Long> findByParent(String cls, Long id) {
+        Multimap<String, Long> result = Multimaps.newSetMultimap(Maps.newHashMap(), Sets::newHashSet);
+
+        List<ResourceRelation> list = finder.query().where().eq("parentCls", cls).eq("parentId", id).findList();
+        list.forEach(rr -> result.put(rr.childCls, rr.childId));
+
+        return result;
     }
 }

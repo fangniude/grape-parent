@@ -5,6 +5,7 @@ import io.ebean.annotation.Cache;
 import io.ebean.annotation.CreatedTimestamp;
 import io.ebean.annotation.UpdatedTimestamp;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,6 +22,7 @@ import java.util.Optional;
  */
 @Getter
 @Setter
+@NoArgsConstructor
 @Cache(naturalKey = "primary_key")
 @MappedSuperclass
 public abstract class GrapeModel extends Model {
@@ -44,9 +46,6 @@ public abstract class GrapeModel extends Model {
 
     @UpdatedTimestamp
     protected LocalDateTime whenUpdated;
-
-    protected GrapeModel() {
-    }
 
     public GrapeModel(String key) {
         this.key = key;
