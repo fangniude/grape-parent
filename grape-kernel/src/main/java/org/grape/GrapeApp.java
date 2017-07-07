@@ -99,9 +99,12 @@ public class GrapeApp {
     public static void start(String[] args) {
         plugins.forEach(GrapePlugin::inTheBeginning);
 
-        createEbeanServer();
-        flyway();
-        plugins.forEach(GrapePlugin::afterDataBaseInitial);
+        boolean hasEntity = plugins.stream().map(GrapePlugin::hasEntity).reduce(false, (aBoolean, aBoolean2) -> aBoolean && aBoolean2);
+        if (hasEntity) {
+            createEbeanServer();
+            flyway();
+            plugins.forEach(GrapePlugin::afterDataBaseInitial);
+        }
 
         initSpring(args);
 
